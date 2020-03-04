@@ -24,7 +24,11 @@ cloudinary.config({
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET
 })
-
+console.log({
+  cloud_name: 'dpem2z8y9',
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+})
 const storage = cloudinaryStorage({
   cloudinary,
   folder: 'pets',
