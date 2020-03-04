@@ -45,7 +45,7 @@ app.get('/', (req, res) => {
 app.post('/pets', async (req, res) => {
   const uploader = parser.single('image')
 
-  uploader(req, res, (err) => {
+  uploader(req, res, async (err) => {
     if (err) {
       console.log('upload issue', err)
       res.status(400).json({ errors: err.errors })
