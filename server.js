@@ -24,11 +24,7 @@ cloudinary.config({
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET
 })
-console.log({
-  cloud_name: 'dpem2z8y9',
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET
-})
+
 const storage = cloudinaryStorage({
   cloudinary,
   folder: 'pets',
@@ -46,23 +42,18 @@ app.get('/', (req, res) => {
   res.send('Hello world')
 })
 
-app.post('/pets', async (req, res) => {
-  const uploader = parser.single('image')
+app.get('/pets', async (req, res) => {
+  const pets = await Pet.find()
+  res.json(pets)
+})
 
-  uploader(req, res, async (err) => {
-    if (err) {
-      console.log('upload issue', err)
-      res.status(400).json({ errors: err.errors })
-    } else {
-      try {
-        const pet = await new Pet({ name: req.body.name, imageUrl: req.file.url, imageId: req.file.public_id }).save()
-        res.json(pet)
-      } catch (err) {
-        console.log('mongo issue')
-        res.status(400).json({ errors: err.errors })
-      }
-    }
-  })
+app.post('/pets', parser.single('image'), async (req, res) => {
+  try {
+    const pet = await new Pet({ name: req.body.name, imageUrl: req.file.url, imageId: req.file.public_id }).save()
+    res.json(pet)
+  } catch (err) {
+    res.status(400).json({ errors: err.errors })
+  }
 })
 
 app.listen(port, () => {
