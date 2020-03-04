@@ -26,12 +26,12 @@ cloudinary.config({
 })
 
 const storage = cloudinaryStorage({
-  cloudinary: cloudinary,
+  cloudinary,
   folder: 'pets',
   allowedFormats: ["jpg", "png"],
   transformation: [{ width: 500, height: 500, crop: "limit" }]
 })
-const parser = multer({ storage: storage, onError: (err) => { console.error('caught error', err) } })
+const parser = multer({ storage })
 const port = process.env.PORT || 8080
 const app = express()
 
@@ -42,14 +42,23 @@ app.get('/', (req, res) => {
   res.send('Hello world')
 })
 
-app.post('/pets', parser.single('image'), async (req, res) => {
-  console.log(req)
-  try {
-    const pet = await new Pet({ name: req.body.name, imageUrl: req.file.url, imageId: req.file.public_id }).save()
-    res.json(pet)
-  } catch (err) {
-    res.status(400).json({ errors: err.errors })
-  }
+app.post('/pets', async (req, res) => {
+  const uploader = parser.single('image')
+
+  uploader(req, res, (err) => {
+    if (err) {
+      console.log('upload issue', err)
+      res.status(400).json({ errors: err.errors })
+    } else {
+      try {
+        const pet = await new Pet({ name: req.body.name, imageUrl: req.file.url, imageId: req.file.public_id }).save()
+        res.json(pet)
+      } catch (err) {
+        console.log('mongo issue')
+        res.status(400).json({ errors: err.errors })
+      }
+    }
+  })
 })
 
 app.listen(port, () => {
